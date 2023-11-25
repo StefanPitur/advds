@@ -20,14 +20,14 @@ about the ethical issues around this data.
 
 
 class PropertyPricesDbConnector:
-    conn = None
+    _conn = None
 
     def __init__(self, host, port, username, password):
-        self.host = host
-        self.port = port
-        self.username = username
-        self.password = password
-        self.database = "property_prices"
+        self._host = host
+        self._port = port
+        self._username = username
+        self._password = password
+        self._database = "property_prices"
 
         try:
             self._create_database()
@@ -40,10 +40,10 @@ class PropertyPricesDbConnector:
     def _create_database(self):
         try:
             conn = pymysql.connect(
-                host=self.host,
-                port=self.port,
-                user=self.username,
-                password=self.password
+                host=self._host,
+                port=self._port,
+                user=self._username,
+                password=self._password
             )
             conn.cursor().execute("CREATE DATABASE {}".format(self.database))
         except Exception:
@@ -54,26 +54,30 @@ class PropertyPricesDbConnector:
             Create connection to the MariaDB instance on AWS by using the host url, port, credentials and database name.
         """
         try:
-            self.conn = pymysql.connect(
-                host=self.host,
-                port=self.port,
-                user=self.username,
-                password=self.password,
-                database=self.database,
+            self._conn = pymysql.connect(
+                host=self._host,
+                port=self._port,
+                user=self._username,
+                password=self._password,
+                database=self._database,
                 local_infile=1
             )
         except Exception:
             raise DatabaseConnectionException("Could not establish connection to the database server")
 
     def get_conn(self):
-        return self.conn
+        return self._conn
 
 
 def create_and_populate_pp_data_table(property_prices_db: PropertyPricesDbConnector):
+    create_pp_data_table(property_prices_db)
     conn = property_prices_db.get_conn()
 
     return "Calling method to generate pp_data table"
 
+
+def create_pp_data_table(property_prices_db: PropertyPricesDbConnector):
+    conn = property_prices_db.get_conn()
 
 def data():
     """Read the data from the web or local file, returning structured format such as a data frame"""
