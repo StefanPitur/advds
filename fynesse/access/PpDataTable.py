@@ -37,7 +37,7 @@ class PpDataTable:
             """)
             self._conn.cursor().execute("""
                 -- Primary key for table `pp_data` 
-                ALTER TABLE `pp_data`\n
+                ALTER TABLE `pp_data`
                 ADD PRIMARY KEY (`db_id`);
             """)
             self._conn.cursor().execute("""
@@ -48,4 +48,11 @@ class PpDataTable:
             print("Could not create `pp_data` table on the database server - {}".format(e))
 
     def populate_table(self):
-        pass
+        try:
+            self._conn.cursor().execute("""
+                LOAD DATA LOCAL INFILE 'pp-complete.csv' INTO TABLE `pp_data`
+                FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED by '"'
+                LINES STARTING BY '' TERMINATED BY '\n';
+            """)
+        except Exception as e:
+            print("Could not upload data to `pp_data` table from local file - {}".format(e))
