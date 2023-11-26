@@ -28,9 +28,18 @@ class PropertyPricesDbConnector:
                 user=self._username,
                 password=self._password
             )
-            conn.cursor().execute("CREATE DATABASE {}".format(self.database))
-        except Exception:
-            raise DatabaseCreationException("Could not create a new database at the give server!")
+            conn.cursor().execute("""
+                IF NOT EXISTS (
+                    SELECT name
+                    FROM sys.databases
+                    WHERE name = 'property_prices'
+                )
+                BEGIN
+                    CREATE DATABASE property_prices;
+                END
+            """)
+        except Exception as e:
+            raise DatabaseCreationException(f"Could not create a new database at the give server! - {e}")
 
     def _create_connection_to_database(self):
         """
@@ -45,8 +54,8 @@ class PropertyPricesDbConnector:
                 database=self._database,
                 local_infile=1
             )
-        except Exception:
-            raise DatabaseConnectionException("Could not establish connection to the database server")
+        except Exception as e:
+            raise DatabaseConnectionException(f"Could not establish connection to the database server! - {e}")
 
     def get_conn(self):
         return self._conn
