@@ -28,16 +28,7 @@ class PropertyPricesDbConnector:
                 user=self._username,
                 password=self._password
             )
-            conn.cursor().execute("""
-                IF NOT EXISTS (
-                    SELECT name
-                    FROM sys.databases
-                    WHERE name = 'property_prices'
-                )
-                BEGIN
-                    CREATE DATABASE property_prices;
-                END
-            """)
+            conn.cursor().execute(f"CREATE DATABASE IF NOT EXISTS {self._database}")
         except Exception as e:
             raise DatabaseCreationException(f"Could not create a new database at the give server! - {e}")
 
