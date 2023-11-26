@@ -6,9 +6,10 @@ class PpDataTable:
 
     def __init__(self, property_prices_db: PropertyPricesDbConnector):
         self._conn = property_prices_db.get_conn()
-        self.create_table()
+        self._create_table()
+        self._populate_table()
 
-    def create_table(self):
+    def _create_table(self):
         try:
             self._conn.cursor().execute("""
                 -- Table structure for table `pp_data`
@@ -47,12 +48,20 @@ class PpDataTable:
         except Exception as e:
             print("Could not create `pp_data` table on the database server - {}".format(e))
 
-    def populate_table(self):
+    def _populate_table(self):
         try:
             self._conn.cursor().execute("""
-                LOAD DATA LOCAL INFILE 'pp-complete.csv' INTO TABLE `pp_data`
+                LOAD DATA LOCAL INFILE 'pp-complete.csv' INTO TABLE pp_data
                 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED by '"'
                 LINES STARTING BY '' TERMINATED BY '\n';
             """)
         except Exception as e:
             print("Could not upload data to `pp_data` table from local file - {}".format(e))
+
+    def get_number_of_rows(self):
+        cur = self._conn.cursor()
+        cur.execute("""
+            SELECT COUNT(*) AS row_count
+            FROM pp_data
+        """)
+        return cur.fetchall()

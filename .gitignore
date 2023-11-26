@@ -3,4 +3,4 @@ fynesse.egg-info/
 fynesse/__pycache__/
 notebooks/.ipynb_checkpoints/
 notebooks/credentials.yaml
-pp-complete.csv
+notebooks/pp-complete.csv
