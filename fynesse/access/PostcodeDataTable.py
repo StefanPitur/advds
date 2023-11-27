@@ -70,7 +70,7 @@ class PostcodeDataTable:
         index_column_name = "pd." + column_name
         try:
             self._conn.cursor().execute(f"""
-                CREATE INDEX {index_column_name} USING HASH
+                CREATE INDEX `{index_column_name}` USING HASH
                 ON `postcode_data` ({column_name})
             """)
         except Exception as e:

@@ -70,7 +70,7 @@ class PpDataTable:
         index_column_name = "pp." + column_name
         try:
             self._conn.cursor().execute(f"""
-                CREATE INDEX {index_column_name} USING HASH
+                CREATE INDEX `{index_column_name}` USING HASH
                 ON `pp_data` ({column_name})
             """)
         except Exception as e:
