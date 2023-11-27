@@ -65,3 +65,13 @@ class PpDataTable:
             FROM pp_data
         """)
         return cur.fetchall()
+
+    def create_index_on_column(self, column_name):
+        index_column_name = "pp." + column_name
+        try:
+            self._conn.cursor().execute(f"""
+                CREATE INDEX {index_column_name} USING HASH
+                ON `pp_data` ({column_name})
+            """)
+        except Exception as e:
+            print("Could not create index from column {} on table pp_data - {}".format(column_name, e))
