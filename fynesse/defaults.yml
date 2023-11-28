@@ -1,3 +1,17 @@
 # Place config informatio you want everyone to have here.
 data_url: https://raw.githubusercontent.com/lawrennd/datasets_mirror/main/
-default_tags: ["amenity:school", "amenity:restaurant", "leisure", "healthcare", "shop", "public_transport"]
+default_tags: {
+    "amenity": ["school", "restaurant"],
+    "leisure": True,
+    "healthcare":True,
+    "shop": True,
+    "public_transport": True
+}
+default_tags_list: ["school", "restaurant", "leisure", "healthcare", "shop", "public_transport"]
+default_bounding_box: 0.1
+default_category_distance_boundaries: {
+    "walking_distance": 0.5,
+    "cycling_distance": 5,
+    "driving_distance": 10
+}
+default_training_size: 0.8
