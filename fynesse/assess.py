@@ -8,9 +8,9 @@ from .config import config
 from . import access
 
 
-def compute_tags_count_per_distance_category(pois_df, latitude, longitude, tags_list=config["default_tags_list"],
+def compute_tags_count_per_distance_category(pois_df, latitude, longitude, tags_list=config['default_tags_list'],
                                              category_distance_boundaries=config[
-                                                 "default_category_distance_boundaries"]):
+                                                 'default_category_distance_boundaries']):
     tag_count_per_distance_category = {}
 
     for tag in tags_list:
@@ -86,8 +86,8 @@ def get_distances_features_from_a_house(house):
 
 
 def compute_bounding_box_cardinals(latitude, longitude,
-                                   box_width=config["default_bounding_box"],
-                                   box_height=config["default_bounding_box"]):
+                                   box_width=config['default_bounding_box'],
+                                   box_height=config['default_bounding_box']):
     north = latitude + box_height / 2
     south = latitude - box_height / 2
     west = longitude - box_width / 2
@@ -106,7 +106,7 @@ def get_date_range(date, days_range=365):
     return lower_bound_date.strftime("%Y-%m-%d"), upper_bound_date.strftime("%Y-%m-%d")
 
 
-def split_training_and_validation_data(data, train_size=config["default_training_size"]):
+def split_training_and_validation_data(data, train_size=config['default_training_size']):
     return train_test_split(data, train_size=train_size)
 
 
