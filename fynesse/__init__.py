@@ -1,2 +1,2 @@
-from .access import access
+from . import access
 from . import assess
