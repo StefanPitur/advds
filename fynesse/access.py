@@ -20,9 +20,9 @@ about the ethical issues around this data.
 default_tags = {
     "amenity": ["school", "restaurant"],
     "leisure": True,
-    "healthcare":True,
+    "healthcare": True,
     "shop": True,
-    "public_transport": True
+    "public_transport": True,
 }
 
 # Create property_prices database connection on remote SQL server
