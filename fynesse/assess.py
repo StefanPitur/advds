@@ -5,7 +5,7 @@ import datetime
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 from .config import *
-import access
+from . import access
 
 
 def compute_tags_count_per_distance_category(pois_df, latitude, longitude, tags_list=config["default_tags_list"],
