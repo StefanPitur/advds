@@ -263,8 +263,29 @@ def number_of_rows_prices_coordinates_data_table(conn):
     """)
 
 
-# OpenStreetMap
+def get_prices_coordinates_for_coords_and_timedelta(conn, bounding_box, min_date, max_date, property_type):
+    north, south, west, east = bounding_box
+    cur = conn.cursor()
+    cur.execute(f"""
+        SELECT pp.price, pp.date_of_transfer, pp.postcode, pp.property_type, pp.new_build_flag, pp.tenure_type, pp.locality, pp.town_city, pp.district, pp.county, pd.country, pd.latitude, pd.longitude
+        FROM
+            (
+                SELECT price, date_of_transfer, postcode, property_type, new_build_flag, tenure_type, locality, town_city, district, county 
+                FROM pp_data
+                WHERE (date_of_transfer BETWEEN '{min_date}' AND '{max_date}') AND property_type = '{property_type}' 
+            ) pp
+        INNER JOIN
+            (
+                SELECT postcode, country, latitude, longitude
+                FROM postcode_data
+                WHERE (latitude BETWEEN {south} AND {north}) AND (longitude BETWEEN {west} AND {east})
+            ) pd
+        ON pp.postcode = pd.postcode
+    """)
+    return cur.fetchall()
 
+
+# OpenStreetMap
 def retrieve_pois_from_bbox_given_tags(bounding_box, tags=config["default_tags"]):
-    print(tags)
-    pass
+    north, south, west, east = bounding_box
+    return ox.features_from_bbox(north, south, east, west, tags)
