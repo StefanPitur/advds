@@ -1,7 +1,7 @@
 # This file contains code for supporting addressing questions in the data
 
 import assess
-from access import access
+import access
 import numpy as np
 import statsmodels.api as sm
 import pandas as pd

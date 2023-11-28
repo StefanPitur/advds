@@ -5,7 +5,7 @@ import datetime
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import config
-from access import access
+import access
 
 
 def compute_tags_count_per_distance_category(pois_df, latitude, longitude, tags_list=config["default_tags_list"],
@@ -111,9 +111,9 @@ def split_training_and_validation_data(data, train_size=config["default_training
 
 
 def plot_test_against_predicted(Y_test, Y_predicted):
-    bin = np.linspace(1, len(Y_test), len(Y_test))
+    bins = np.linspace(1, len(Y_test), len(Y_test))
     fig = plt.figure(figsize=(15, 10))
-    plt.bar(bin - 0.1, Y_test, width=0.2, color='b', label="Actual house price")
-    plt.bar(bin + 0.1, Y_predicted, width=0.2, color='g', label="Predicted house price")
+    plt.bar(bins - 0.1, Y_test, width=0.2, color='b', label="Actual house price")
+    plt.bar(bins + 0.1, Y_predicted, width=0.2, color='g', label="Predicted house price")
     plt.legend(loc='upper left')
     plt.show()
