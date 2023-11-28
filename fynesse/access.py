@@ -1,4 +1,4 @@
-from .config import *
+from .config import config
 import pymysql
 import osmnx as ox
 
