@@ -4,7 +4,7 @@ from haversine import haversine, Unit
 import datetime
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
-import config
+from .config import *
 import access
 
 

@@ -1,4 +1,4 @@
-from fynesse.config import *
+from .config import *
 import pymysql
 import osmnx as ox
 
