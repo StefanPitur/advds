@@ -93,6 +93,7 @@ def create_pp_data_table(conn):
         ALTER TABLE `pp_data`
         MODIFY db_id bigint(20) unsigned NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
     """)
+    conn.commit()
 
 
 def populate_pp_data_table(conn):
@@ -101,6 +102,7 @@ def populate_pp_data_table(conn):
         FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED by '"'
         LINES STARTING BY '' TERMINATED BY '\n';
     """)
+    conn.commit()
 
 
 def create_column_index_on_pp_data_table(conn, column_name):
@@ -113,6 +115,7 @@ def create_column_index_on_pp_data_table(conn, column_name):
         CREATE INDEX IF NOT EXISTS `{index_column_name}` USING HASH
         ON `pp_data` ({column_name})
     """)
+    conn.commit()
 
 
 # postcode_data code
@@ -158,6 +161,7 @@ def create_postcode_data_table(conn):
         ALTER TABLE `postcode_data`
         MODIFY `db_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=1;
     """)
+    conn.commit()
 
 
 def populate_postcode_data_table(conn):
@@ -166,6 +170,7 @@ def populate_postcode_data_table(conn):
         FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED by '"'
         LINES STARTING BY '' TERMINATED BY '\n';
     """)
+    conn.commit()
 
 
 def create_column_index_on_postcode_data_table(conn, column_name):
@@ -178,6 +183,7 @@ def create_column_index_on_postcode_data_table(conn, column_name):
         CREATE INDEX IF NOT EXISTS `{index_column_name}` USING HASH
         ON `postcode_data` ({column_name})
     """)
+    conn.commit()
 
 
 # prices_coordinates_data code
@@ -217,6 +223,7 @@ def create_prices_coordinates_data_table(conn):
         ALTER TABLE `prices_coordinates_data`
         MODIFY `db_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=1;
     """)
+    conn.commit()
 
 
 def populate_prices_coordinates_data_table(conn):
@@ -236,19 +243,20 @@ def populate_prices_coordinates_data_table(conn):
             `latitude`,
             `longitude`
         )
-        SELECT pd.price, pd.date_of_transfer, pd.postcode, pd.property_type, pd.new_build_flag, pd.tenure_type, pd.locality, pd.town_city, pd.district, pd.county, pcd.country, pcd.latitude, pcd.longitude
+        SELECT pp.price, pp.date_of_transfer, pp.postcode, pp.property_type, pp.new_build_flag, pp.tenure_type, pp.locality, pp.town_city, pp.district, pp.county, pd.country, pd.latitude, pd.longitude
         FROM
             (
                 SELECT price, date_of_transfer, postcode, property_type, new_build_flag, tenure_type, locality, town_city, district, county
                 FROM pp_data 
-            ) pd
+            ) pp
         INNER JOIN
             (
                 SELECT postcode, country, latitude, longitude
                 FROM postcode_data
-            ) pcd
-        ON pd.`pp.postcode` = pcd.`pc.postcode`
+            ) pd
+        ON pp.postcode = pd.postcode
     """)
+    conn.commit()
 
 
 def create_column_index_on_prices_coordinates_data_table(conn, column_name):
@@ -260,14 +268,16 @@ def create_column_index_on_prices_coordinates_data_table(conn, column_name):
         CREATE INDEX IF NOT EXISTS `{index_column_name}` USING HASH
         ON `prices_coordinates_data` ({column_name})
     """)
+    conn.commit()
 
 
 def number_of_rows_prices_coordinates_data_table(conn):
     cur = conn.cursor()
     cur.execute("""
-        SELECT COUNT(*) AS row_count
-        FROM `prices_coordinates_data`
-    """)
+           SELECT COUNT(*) AS row_count
+           FROM `prices_coordinates_data`
+        """)
+    return cur.fetchall()
 
 
 def get_prices_coordinates_for_coords_and_timedelta(conn, bounding_box, min_date, max_date, property_type):
