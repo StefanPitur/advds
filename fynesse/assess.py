@@ -27,3 +27,7 @@ def view(data):
 def labelled(data):
     """Provide a labelled set of data ready for supervised learning."""
     raise NotImplementedError
+
+
+def compute_tags_count_per_distance_category(pois_df):
+
