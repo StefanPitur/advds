@@ -1,5 +1,6 @@
 from fynesse.config import *
 import pymysql
+import osmnx as ox
 
 """These are the types of import we might expect in this file
 import httplib2
@@ -170,3 +171,100 @@ def create_column_index_on_postcode_data_table(conn, column_name):
         CREATE INDEX IF NOT EXISTS `{index_column_name}` USING HASH
         ON `postcode_data` ({column_name})
     """)
+
+
+# prices_coordinates_data code
+
+def create_and_populate_prices_coordinates_data_table(conn):
+    create_prices_coordinates_data_table(conn)
+    populate_prices_coordinates_data_table(conn)
+
+
+def create_prices_coordinates_data_table(conn):
+    conn.cursor().execute("""
+        DROP TABLE IF EXISTS `prices_coordinates_data`;
+    """)
+    conn.cursor().execute("""
+        CREATE TABLE IF NOT EXISTS `prices_coordinates_data` (
+          `price` int(10) unsigned NOT NULL,
+          `date_of_transfer` date NOT NULL,
+          `postcode` varchar(8) COLLATE utf8_bin NOT NULL,
+          `property_type` varchar(1) COLLATE utf8_bin NOT NULL,
+          `new_build_flag` varchar(1) COLLATE utf8_bin NOT NULL,
+          `tenure_type` varchar(1) COLLATE utf8_bin NOT NULL,
+          `locality` tinytext COLLATE utf8_bin NOT NULL,
+          `town_city` tinytext COLLATE utf8_bin NOT NULL,
+          `district` tinytext COLLATE utf8_bin NOT NULL,
+          `county` tinytext COLLATE utf8_bin NOT NULL,
+          `country` enum('England', 'Wales', 'Scotland', 'Northern Ireland', 'Channel Islands', 'Isle of Man') NOT NULL,
+          `latitude` decimal(11,8) NOT NULL,
+          `longitude` decimal(10,8) NOT NULL,
+          `db_id` bigint(20) unsigned NOT NULL
+        ) DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
+    """)
+    conn.cursor().execute("""
+        ALTER TABLE `prices_coordinates_data`
+        ADD PRIMARY KEY (`db_id`);
+    """)
+    conn.cursor().execute("""
+        ALTER TABLE `prices_coordinates_data`
+        MODIFY `db_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=1;
+    """)
+
+
+def populate_prices_coordinates_data_table(conn):
+    conn.cursor().execute("""
+        INSERT INTO `prices_coordinates_data` (
+            `price`,
+            `date_of_transfer`,
+            `postcode`,
+            `property_type`,
+            `new_build_flag`,
+            `tenure_type`,
+            `locality`,
+            `town_city`,
+            `district`,
+            `county`,
+            `country`,
+            `latitude`,
+            `longitude`
+        )
+        SELECT pd.price, pd.date_of_transfer, pd.postcode, pd.property_type, pd.new_build_flag, pd.tenure_type, pd.locality, pd.town_city, pd.district, pd.county, pcd.country, pcd.latitude, pcd.longitude
+        FROM
+            (
+                SELECT price, date_of_transfer, postcode, property_type, new_build_flag, tenure_type, locality, town_city, district, county
+                FROM pp_data 
+            ) pd
+        INNER JOIN
+            (
+                SELECT postcode, country, latitude, longitude
+                FROM postcode_data
+            ) pcd
+        ON pd.`pp.postcode` = pcd.`pc.postcode`
+    """)
+
+
+def create_column_index_on_prices_coordinates_data_table(conn, column_name):
+    index_column_name = "pcd." + column_name
+    conn.cursor().execute(f"""
+        DROP INDEX IF EXISTS `{index_column_name}` ON `prices_coordinates_data`
+    """)
+    conn.cursor().execute(f"""
+        CREATE INDEX IF NOT EXISTS `{index_column_name}` USING HASH
+        ON `prices_coordinates_data` ({column_name})
+    """)
+
+
+def number_of_rows_prices_coordinates_data_table(conn):
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT COUNT(*) AS row_count
+        FROM `prices_coordinates_data`
+    """)
+
+
+# OpenStreetMap
+
+def retrieve_pois_from_bbox_given_tags(bounding_box, tags=config["default_tags"]):
+    print(tags)
+    pass
