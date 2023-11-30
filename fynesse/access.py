@@ -100,7 +100,7 @@ def create_pp_data_table(conn):
 
 def download_pp_data():
     complete_pp_data_url = "http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-complete.csv"
-    pp_data_csv_path = "tmp/pp-complete.csv"
+    pp_data_csv_path = os.path.join(os.getcwd(), "tmp/pp-complete.csv")
     return download_file(complete_pp_data_url, pp_data_csv_path)
 
 
@@ -175,7 +175,7 @@ def create_postcode_data_table(conn):
 
 def download_postcode_data():
     postcode_data_url = "https://www.getthedata.com/downloads/open_postcode_geo.csv.zip"
-    postcode_data_zip_path = "tmp/open_postcode_geo.csv.zip"
+    postcode_data_zip_path = os.path.join(os.getcwd(), "tmp/open_postcode_geo.csv.zip")
     download_file(postcode_data_url, postcode_data_zip_path)
     return unzip_file(postcode_data_zip_path)
 
@@ -326,6 +326,10 @@ def retrieve_pois_from_bbox_given_tags(bounding_box, tags=config["default_tags"]
 
 # Util functions
 def download_file(url_source, output_file_path):
+    dir_path = os.path.dirname(output_file_path)
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+
     with open(output_file_path, 'wb') as f:
         with requests.get(url_source, stream=True) as r:
             for chunk in r.iter_content(chunk_size=8192):
@@ -341,8 +345,6 @@ def get_unzipped_file_name(zipped_file_name: str):
 
 def unzip_file(zipped_file_path):
     file_path = os.path.dirname(zipped_file_path)
-    zipped_file_name = os.path.basename(zipped_file_path)
-    unzipped_file_name = get_unzipped_file_name(zipped_file_name)
-
-    zipfile.ZipFile(zipped_file_name, 'r').extractall(file_path)
-    return file_path + "/" + unzipped_file_name
+    unzipped_file_name = get_unzipped_file_name(zipped_file_path)
+    zipfile.ZipFile(zipped_file_path, 'r').extractall(file_path)
+    return unzipped_file_name
