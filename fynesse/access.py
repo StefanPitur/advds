@@ -113,19 +113,6 @@ def populate_pp_data_table(conn, pp_data_csv_path):
     conn.commit()
 
 
-def create_column_index_on_pp_data_table(conn, column_name):
-    index_column_name = "pp." + column_name
-
-    conn.cursor().execute(f"""
-        DROP INDEX IF EXISTS `{index_column_name}` ON `pp_data`
-    """)
-    conn.cursor().execute(f"""
-        CREATE INDEX IF NOT EXISTS `{index_column_name}` USING HASH
-        ON `pp_data` ({column_name})
-    """)
-    conn.commit()
-
-
 # postcode_data code
 
 
@@ -185,19 +172,6 @@ def populate_postcode_data_table(conn, postcode_data_csv_path):
         LOAD DATA LOCAL INFILE '{postcode_data_csv_path}' INTO TABLE `postcode_data`
         FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED by '"'
         LINES STARTING BY '' TERMINATED BY '\n';
-    """)
-    conn.commit()
-
-
-def create_column_index_on_postcode_data_table(conn, column_name):
-    index_column_name = "pd." + column_name
-
-    conn.cursor().execute(f"""
-        DROP INDEX IF EXISTS `{index_column_name}` ON `postcode_data`
-    """)
-    conn.cursor().execute(f"""
-        CREATE INDEX IF NOT EXISTS `{index_column_name}` USING HASH
-        ON `postcode_data` ({column_name})
     """)
     conn.commit()
 
@@ -275,18 +249,6 @@ def populate_prices_coordinates_data_table(conn):
     conn.commit()
 
 
-def create_column_index_on_prices_coordinates_data_table(conn, column_name):
-    index_column_name = "pcd." + column_name
-    conn.cursor().execute(f"""
-        DROP INDEX IF EXISTS `{index_column_name}` ON `prices_coordinates_data`
-    """)
-    conn.cursor().execute(f"""
-        CREATE INDEX IF NOT EXISTS `{index_column_name}` USING HASH
-        ON `prices_coordinates_data` ({column_name})
-    """)
-    conn.commit()
-
-
 def number_of_rows_prices_coordinates_data_table(conn):
     cur = conn.cursor()
     cur.execute("""
@@ -325,6 +287,17 @@ def retrieve_pois_from_bbox_given_tags(bounding_box, tags=config["default_tags"]
 
 
 # Util functions
+def create_column_index_on_table(conn, table, index_column_name, column_name):
+    conn.cursor().execute(f"""
+            DROP INDEX IF EXISTS `{index_column_name}` ON `{table}`
+        """)
+    conn.cursor().execute(f"""
+            CREATE INDEX IF NOT EXISTS `{index_column_name}` USING HASH
+            ON `prices_coordinates_data` ({column_name})
+        """)
+    conn.commit()
+
+
 def download_file(url_source, output_file_path):
     dir_path = os.path.dirname(output_file_path)
     if not os.path.exists(dir_path):
