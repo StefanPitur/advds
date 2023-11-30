@@ -2,6 +2,8 @@ import pymysql
 import osmnx as ox
 from .config import *
 import requests
+import zipfile
+import os
 
 # This file accesses the data
 
@@ -54,8 +56,8 @@ def create_db_connection(
 
 def create_and_populate_pp_data_table(conn):
     create_pp_data_table(conn)
-    download_pp_data()
-    populate_pp_data_table(conn)
+    pp_data_csv_path = download_pp_data()
+    populate_pp_data_table(conn, pp_data_csv_path)
 
 
 def create_pp_data_table(conn):
@@ -97,18 +99,14 @@ def create_pp_data_table(conn):
 
 
 def download_pp_data():
-    complete_data_url = "http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-complete.csv"
-    pp_data_csv_file = "pp-compelete.csv"
-    with open(pp_data_csv_file, 'wb') as f:
-        with requests.get(complete_data_url, stream=True) as r:
-            for chunk in r.iter_content(chunk_size=8192):
-                if chunk:
-                    f.write(chunk)
+    complete_pp_data_url = "http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-complete.csv"
+    pp_data_csv_path = "tmp/pp-complete.csv"
+    return download_file(complete_pp_data_url, pp_data_csv_path)
 
 
-def populate_pp_data_table(conn):
-    conn.cursor().execute("""
-        LOAD DATA LOCAL INFILE 'pp-complete.csv' INTO TABLE pp_data
+def populate_pp_data_table(conn, pp_data_csv_path):
+    conn.cursor().execute(f"""
+        LOAD DATA LOCAL INFILE '{pp_data_csv_path}' INTO TABLE pp_data
         FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED by '"'
         LINES STARTING BY '' TERMINATED BY '\n';
     """)
@@ -133,7 +131,8 @@ def create_column_index_on_pp_data_table(conn, column_name):
 
 def create_and_populate_postcode_data_table(conn):
     create_postcode_data_table(conn)
-    populate_postcode_data_table(conn)
+    postcode_data_csv_path = download_postcode_data()
+    populate_postcode_data_table(conn, postcode_data_csv_path)
 
 
 def create_postcode_data_table(conn):
@@ -174,9 +173,16 @@ def create_postcode_data_table(conn):
     conn.commit()
 
 
-def populate_postcode_data_table(conn):
-    conn.cursor().execute("""
-        LOAD DATA LOCAL INFILE 'open_postcode_geo.csv' INTO TABLE `postcode_data`
+def download_postcode_data():
+    postcode_data_url = "https://www.getthedata.com/downloads/open_postcode_geo.csv.zip"
+    postcode_data_zip_path = "tmp/open_postcode_geo.csv.zip"
+    download_file(postcode_data_url, postcode_data_zip_path)
+    return unzip_file(postcode_data_zip_path)
+
+
+def populate_postcode_data_table(conn, postcode_data_csv_path):
+    conn.cursor().execute(f"""
+        LOAD DATA LOCAL INFILE '{postcode_data_csv_path}' INTO TABLE `postcode_data`
         FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED by '"'
         LINES STARTING BY '' TERMINATED BY '\n';
     """)
@@ -316,3 +322,27 @@ def get_prices_coordinates_for_coords_and_timedelta(conn, bounding_box, min_date
 def retrieve_pois_from_bbox_given_tags(bounding_box, tags=config["default_tags"]):
     north, south, west, east = bounding_box
     return ox.features_from_bbox(north, south, east, west, tags)
+
+
+# Util functions
+def download_file(url_source, output_file_path):
+    with open(output_file_path, 'wb') as f:
+        with requests.get(url_source, stream=True) as r:
+            for chunk in r.iter_content(chunk_size=8192):
+                if chunk:
+                    f.write(chunk)
+
+    return output_file_path
+
+
+def get_unzipped_file_name(zipped_file_name: str):
+    return ".".join(zipped_file_name.split('.')[:-1])
+
+
+def unzip_file(zipped_file_path):
+    file_path = os.path.dirname(zipped_file_path)
+    zipped_file_name = os.path.basename(zipped_file_path)
+    unzipped_file_name = get_unzipped_file_name(zipped_file_name)
+
+    zipfile.ZipFile(zipped_file_name, 'r').extractall(file_path)
+    return file_path + "/" + unzipped_file_name
