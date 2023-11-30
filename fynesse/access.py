@@ -17,9 +17,9 @@ about the ethical issues around this data.
 def create_database(
         username,
         password,
+        database,
         host=config["default_host_url"],
         port=config["default_port"],
-        database=config["default_database"]
 ):
     conn = pymysql.connect(
         host=host,
@@ -30,12 +30,12 @@ def create_database(
     conn.cursor().execute(f"CREATE DATABASE IF NOT EXISTS `{database}`")
 
 
-def create_property_prices_db_connection(
+def create_db_connection(
         username,
         password,
+        database,
         host=config["default_host_url"],
         port=config["default_port"],
-        database=config["default_database"]
 ):
     conn = pymysql.connect(
         host=host,
