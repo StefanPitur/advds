@@ -1,6 +1,7 @@
 import pymysql
 import osmnx as ox
 from .config import *
+import requests
 
 # This file accesses the data
 
@@ -53,6 +54,7 @@ def create_db_connection(
 
 def create_and_populate_pp_data_table(conn):
     create_pp_data_table(conn)
+    download_pp_data()
     populate_pp_data_table(conn)
 
 
@@ -92,6 +94,16 @@ def create_pp_data_table(conn):
         MODIFY db_id bigint(20) unsigned NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
     """)
     conn.commit()
+
+
+def download_pp_data():
+    complete_data_url = "http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-complete.csv"
+    pp_data_csv_file = "pp-compelete.csv"
+    with open(pp_data_csv_file, 'wb') as f:
+        with requests.get(complete_data_url, stream=True) as r:
+            for chunk in r.iter_content(chunk_size=8192):
+                if chunk:
+                    f.write(chunk)
 
 
 def populate_pp_data_table(conn):
