@@ -293,7 +293,7 @@ def create_column_index_on_table(conn, table, index_column_name, column_name):
         """)
     conn.cursor().execute(f"""
             CREATE INDEX IF NOT EXISTS `{index_column_name}` USING HASH
-            ON `prices_coordinates_data` ({column_name})
+            ON `{table}` ({column_name})
         """)
     conn.commit()
 
