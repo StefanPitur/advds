@@ -1,12 +1,6 @@
 import pymysql
 import osmnx as ox
-
-"""These are the types of import we might expect in this file
-import httplib2
-import oauth2
-import tables
-import mongodb
-import sqlite"""
+from .config import *
 
 # This file accesses the data
 
@@ -17,13 +11,13 @@ both intellectual property and personal data privacy rights. Beyond the legal si
 about the ethical issues around this data. 
 """
 
-default_tags = {
-    "amenity": ["school", "restaurant"],
-    "leisure": True,
-    "healthcare": True,
-    "shop": True,
-    "public_transport": True,
-}
+# default_tags = {
+#     "amenity": ["school", "restaurant"],
+#     "leisure": True,
+#     "healthcare": True,
+#     "shop": True,
+#     "public_transport": True,
+# }
 
 # Create property_prices database connection on remote SQL server
 
@@ -303,6 +297,6 @@ def get_prices_coordinates_for_coords_and_timedelta(conn, bounding_box, min_date
 
 
 # OpenStreetMap
-def retrieve_pois_from_bbox_given_tags(bounding_box, tags=default_tags):
+def retrieve_pois_from_bbox_given_tags(bounding_box, tags=config["default_tags"]):
     north, south, west, east = bounding_box
     return ox.features_from_bbox(north, south, east, west, tags)
