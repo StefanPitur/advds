@@ -11,34 +11,38 @@ both intellectual property and personal data privacy rights. Beyond the legal si
 about the ethical issues around this data. 
 """
 
-# default_tags = {
-#     "amenity": ["school", "restaurant"],
-#     "leisure": True,
-#     "healthcare": True,
-#     "shop": True,
-#     "public_transport": True,
-# }
-
 # Create property_prices database connection on remote SQL server
 
 
-def create_property_prices_database(host, port, username, password):
+def create_database(
+        username,
+        password,
+        host=config["default_host_url"],
+        port=config["default_port"],
+        database=config["default_database"]
+):
     conn = pymysql.connect(
         host=host,
         port=port,
         user=username,
         password=password
     )
-    conn.cursor().execute("CREATE DATABASE IF NOT EXISTS `property_prices`")
+    conn.cursor().execute(f"CREATE DATABASE IF NOT EXISTS `{database}`")
 
 
-def create_property_prices_db_connection(host, port, username, password):
+def create_property_prices_db_connection(
+        username,
+        password,
+        host=config["default_host_url"],
+        port=config["default_port"],
+        database=config["default_database"]
+):
     conn = pymysql.connect(
         host=host,
         port=port,
         user=username,
         password=password,
-        database="property_prices",
+        database=database,
         local_infile=1
     )
     return conn
