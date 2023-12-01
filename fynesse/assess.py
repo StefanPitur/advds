@@ -7,15 +7,43 @@ import matplotlib.pyplot as plt
 from . import access
 from .config import *
 
-# TODO: Fix config import
-# default_tags_list = ["school", "restaurant", "leisure", "healthcare", "shop", "public_transport"]
-# default_category_distance_boundaries = {
-#     "walking_distance": 0.5,
-#     "cycling_distance": 5,
-#     "driving_distance": 10
-# }
-# default_bounding_box = 0.1
-# default_training_size = 0.8
+
+def calculate_distance(poi, latitude, longitude):
+    point = (poi["geometry"].centroid.y, poi["geometry"].centroid.x)
+    return haversine(point, (latitude, longitude), unit=Unit.KILOMETERS)
+
+
+def compute_tags_metrics_for_location(latitude, longitude,
+                                      tags_list=config["default_tags_list"],
+                                      tags_distances=config["default_tags_distances"],
+                                      tags_metrics=config["default_tags_metrics"],
+                                      tags_aggregation=config["default_tags_aggregation"]):
+
+    bounding_box = compute_bounding_box_cardinals(latitude, longitude)
+    pois_df = access.retrieve_pois_from_bbox_given_tags(bounding_box, tags_list)
+    pois_df["distance"] = haversine(pois_df["geometry"].centroid, (latitude, longitude))
+    pois_df["distance"] = pois_df.apply(calculate_distance, args=(latitude, longitude), axis=1)
+
+    tag_computed = {}
+
+    for (tag, tag_distance, tag_metric) in zip(tags_list, tags_distances, tags_metrics):
+        try:
+            filtered_pois = pois_df[pois_df[tag].notnull() and pois_df["distance"] <= tag_distance]
+
+            aggregated_tag = tags_aggregation[tag]
+            if tag_metric == "distance":
+                tag_computed[aggregated_tag] = min(
+                    tag_computed.get(aggregated_tag, filtered_pois["distance"].min()),
+                    filtered_pois["distance"].min()
+                )
+            elif tag_metric == "count":
+                tag_computed[aggregated_tag] = tag_computed.get(aggregated_tag, 0) + np.sqrt(filtered_pois.shape[0])
+            else:
+                raise NotImplemented("Need to provide implementation for custom metrics")
+        except Exception:
+            tag_computed[tag_metric] = None
+
+    return tag_computed
 
 
 def compute_tags_count_per_distance_category(pois_df, latitude, longitude, tags_list=config["default_tags_list"],

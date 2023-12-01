@@ -8,6 +8,17 @@ default_tags: {
     "public_transport": True
 }
 default_tags_list: ["school", "leisure", "healthcare", "food", "convenience", "supermarket", "public_transport", "restaurant", "mall"]
+default_tags_aggregation: {
+    "school": "school",
+    "leisure": "leisure",
+    "healthcare": "healthcare",
+    "food": "food",
+    "convenience": "food",
+    "supermarket": "food",
+    "public_transport": "public_transport",
+    "restaurant": "restaurant",
+    "mall": "mall"
+}
 default_tags_distances: [2, 2, 2, 2, 2, 2, 2, 5, 5]
 default_tags_metric: ["distance", "count", "distance", "distance", "distance", "distance", "distance", "count", "distance"]
 default_bounding_box: 0.0451
