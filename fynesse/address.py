@@ -34,7 +34,7 @@ def fit_model(houses_data):
 
     design = np.concatenate([X_training[col].values.reshape(-1, 1) for col in features_columns], axis=1)
     m_linear_basis = sm.OLS(Y_training, design)
-    results_linear_basis = m_linear_basis.fit_regularized(alpha=0.7, L1_wt=1)
+    results_linear_basis = m_linear_basis.fit_regularized(alpha=0.5, L1_wt=1)
 
     design_pred = np.concatenate([X_test[col].values.reshape(-1, 1) for col in features_columns], axis=1)
     Y_predicted = results_linear_basis.predict(design_pred)
@@ -80,6 +80,6 @@ def predict_price(conn, latitude, longitude, date, property_type):
     min_date, max_date = assess.get_date_range(date)
     bounding_box = assess.compute_bounding_box_cardinals(latitude, longitude)
 
-    houses_data = assess.join_osm_with_prices_coordinates(conn, bounding_box, min_date, max_date, property_type, 25)
+    houses_data = assess.join_osm_with_prices_coordinates(conn, bounding_box, min_date, max_date, property_type)
     fitted_model = fit_model(houses_data)
-    return make_prediction(fitted_model, latitude, longitude)
+    return make_prediction(fitted_model, latitude, longitude, date)
