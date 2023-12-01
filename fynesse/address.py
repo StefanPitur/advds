@@ -36,7 +36,15 @@ def fit_model(houses_data):
     Y_predicted = results_linear_basis.predict(design_pred)
     assess.plot_test_against_predicted(Y_test, Y_predicted)
 
-    print(results_linear_basis.summary())
+    coefficients = results_linear_basis.params
+
+    y_mean = np.mean(Y_test)
+    TSS = np.sum((Y_test - y_mean) ** 2)
+    RSS = np.sum((Y_test - Y_predicted) ** 2)
+    R_squared = 1 - (RSS / TSS)
+    print("R^2 - {}\n".format(R_squared))
+    print("Coefficients - {}\n".format(coefficients))
+
     return results_linear_basis
 
 
