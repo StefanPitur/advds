@@ -7,6 +7,10 @@ import pandas as pd
 
 
 def fit_model(houses_data):
+    """
+        Generates fit model for data.
+    """
+
     houses_data["latitude"] = houses_data["latitude"].astype(float)
     houses_data["longitude"] = houses_data["longitude"].astype(float)
 
@@ -48,6 +52,10 @@ def fit_model(houses_data):
 
 
 def make_prediction(fitted_model, latitude, longitude):
+    """
+        Makes prediction using the fitted model and data about given latitude and longitude.
+    """
+
     house_prediction_data = assess.compute_tags_metrics_for_location(
         latitude,
         longitude
@@ -61,6 +69,10 @@ def make_prediction(fitted_model, latitude, longitude):
 
 
 def predict_price(conn, latitude, longitude, date, property_type):
+    """
+        Predictor wrapper over helper methods.
+    """
+
     min_date, max_date = assess.get_date_range(date)
     bounding_box = assess.compute_bounding_box_cardinals(latitude, longitude)
 

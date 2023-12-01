@@ -9,6 +9,9 @@ from .config import *
 
 
 def compute_tags_categories(tags):
+    """
+        Creates a list of tuples to be used when checking if a POI is of a specified type.
+    """
     tags_matches = []
     for (i, j) in tags.items():
         if isinstance(j, bool):
@@ -21,6 +24,10 @@ def compute_tags_categories(tags):
 
 
 def calculate_distance(poi, latitude, longitude):
+    """
+        Given a POI and another point specified by latitude and longitude, compute haversine distance between them.
+    """
+
     point = (poi["geometry"].centroid.y, poi["geometry"].centroid.x)
     return haversine(point, (latitude, longitude), unit=Unit.KILOMETERS)
 
@@ -30,6 +37,15 @@ def compute_tags_metrics_for_location(latitude, longitude,
                                       tags_distances=config["default_tags_distances"],
                                       tags_metrics=config["default_tags_metrics"],
                                       tags_aggregation=config["default_tags_aggregation"]):
+    """
+        For a given point, specified by latitude and longitude, compute metrics
+    based on the assess stage internal strategy. Therefore, all the tags are used with
+    respect to their customised metric (counting or closest distance), aggregation field
+    (i.e. food, convenience, supermarket are all accounted into food) and return a dictionary
+    containing the aggregated fields and their values to be used by the predictor later in address.
+    """
+
+
     bounding_box = compute_bounding_box_cardinals(latitude, longitude)
     pois_df = access.retrieve_pois_from_bbox_given_tags(bounding_box, tags)
 
@@ -65,6 +81,10 @@ def compute_tags_metrics_for_location(latitude, longitude,
 
 
 def join_osm_with_prices_coordinates(conn, bounding_box, min_date, max_date, house_type, house_sample_size=None):
+    """
+        Append Q2 metrics to the joined prices_coordinates dataframe in order to facilitate predictions.
+    """
+
     house_rows = access.get_prices_coordinates_for_coords_and_timedelta(conn, bounding_box, min_date, max_date,
                                                                         house_type)
 
@@ -91,6 +111,10 @@ def join_osm_with_prices_coordinates(conn, bounding_box, min_date, max_date, hou
 
 
 def display_corr_between_features_and_price(sampled_houses_df):
+    """
+        Displays correlation between selected features and the sampled houses.
+    """
+
     filtered_houses_df = sampled_houses_df[[
         'price',
         'school',
@@ -108,6 +132,10 @@ def display_corr_between_features_and_price(sampled_houses_df):
 def compute_bounding_box_cardinals(latitude, longitude,
                                    box_width=config["default_bounding_box"],
                                    box_height=config["default_bounding_box"]):
+    """
+        Computes bounding box given central latitude and longitude and deltas box width and height.
+    """
+
     north = latitude + box_height / 2
     south = latitude - box_height / 2
     west = longitude - box_width / 2
@@ -117,6 +145,10 @@ def compute_bounding_box_cardinals(latitude, longitude,
 
 
 def get_date_range(date, days_range=730):
+    """
+        Given a date and a days_range, return an interval of length days_range where date is in the middle.
+    """
+
     date_split = date.split("-")
     datetime_date = datetime.date(int(date_split[0]), int(date_split[1]), int(date_split[2]))
 
@@ -127,6 +159,9 @@ def get_date_range(date, days_range=730):
 
 
 def split_training_and_validation_data(data, train_size=config["default_training_size"]):
+    """
+        Splits data to be used in training vs. in validation
+    """
     return train_test_split(data, train_size=train_size)
 
 
