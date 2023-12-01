@@ -30,7 +30,7 @@ def fit_model(houses_data):
 
     design = np.concatenate([X_training[col].values.reshape(-1, 1) for col in features_columns], axis=1)
     m_linear_basis = sm.OLS(Y_training, design)
-    results_linear_basis = m_linear_basis.fit()
+    results_linear_basis = m_linear_basis.fit_regularized(alpha=0.10, L1_wt=1)
 
     design_pred = np.concatenate([X_test[col].values.reshape(-1, 1) for col in features_columns], axis=1)
     Y_predicted = results_linear_basis.predict(design_pred)
@@ -49,7 +49,7 @@ def make_prediction(fitted_model, latitude, longitude):
     house_prediction_data["longitude"] = longitude
     new_entry_df = pd.DataFrame([house_prediction_data])
 
-    print(f"Predicted price - {fitted_model.predict(new_entry_df)}")
+    print(f"Predicted price - {fitted_model.predict(new_entry_df)}.")
     return fitted_model.predict(new_entry_df)
 
 
