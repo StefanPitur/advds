@@ -24,13 +24,12 @@ def fit_model(houses_data):
         "healthcare",
         "food",
         "mall",
-        "public_transport",
-        "delta_date_of_transfer"
+        "public_transport"
     ]
 
     design = np.concatenate([X_training[col].values.reshape(-1, 1) for col in features_columns], axis=1)
     m_linear_basis = sm.OLS(Y_training, design)
-    results_linear_basis = m_linear_basis.fit_regularized(alpha=0.10, L1_wt=1)
+    results_linear_basis = m_linear_basis.fit_regularized(alpha=0.5, L1_wt=1)
 
     design_pred = np.concatenate([X_test[col].values.reshape(-1, 1) for col in features_columns], axis=1)
     Y_predicted = results_linear_basis.predict(design_pred)

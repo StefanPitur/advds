@@ -116,7 +116,7 @@ def compute_bounding_box_cardinals(latitude, longitude,
     return north, south, west, east
 
 
-def get_date_range(date, days_range=365):
+def get_date_range(date, days_range=730):
     date_split = date.split("-")
     datetime_date = datetime.date(int(date_split[0]), int(date_split[1]), int(date_split[2]))
 
