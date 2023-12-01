@@ -21,4 +21,4 @@ default_tags_aggregation: {
 default_tags_distances: [2, 5, 2, 2, 2, 2, 2, 5, 2]
 default_tags_metrics: ["distance", "count", "count", "distance", "distance", "distance", "distance", "count", "distance"]
 default_bounding_box: 0.0451
-default_training_size: 0.95
+default_training_size: 0.8

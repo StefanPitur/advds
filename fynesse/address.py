@@ -4,6 +4,7 @@ from . import assess
 import numpy as np
 import statsmodels.api as sm
 import pandas as pd
+from datetime import datetime
 
 
 def fit_model(houses_data):
@@ -33,7 +34,7 @@ def fit_model(houses_data):
 
     design = np.concatenate([X_training[col].values.reshape(-1, 1) for col in features_columns], axis=1)
     m_linear_basis = sm.OLS(Y_training, design)
-    results_linear_basis = m_linear_basis.fit_regularized(alpha=0.5, L1_wt=1)
+    results_linear_basis = m_linear_basis.fit_regularized(alpha=0.7, L1_wt=1)
 
     design_pred = np.concatenate([X_test[col].values.reshape(-1, 1) for col in features_columns], axis=1)
     Y_predicted = results_linear_basis.predict(design_pred)
@@ -51,7 +52,7 @@ def fit_model(houses_data):
     return results_linear_basis
 
 
-def make_prediction(fitted_model, latitude, longitude):
+def make_prediction(fitted_model, latitude, longitude, date):
     """
         Makes prediction using the fitted model and data about given latitude and longitude.
     """
@@ -60,12 +61,15 @@ def make_prediction(fitted_model, latitude, longitude):
         latitude,
         longitude
     )
-    house_prediction_data["delta_days_of"] = latitude
-    house_prediction_data["longitude"] = longitude
-    new_entry_df = pd.DataFrame([house_prediction_data])
 
-    print(f"Predicted price - {fitted_model.predict(new_entry_df)}.")
-    return fitted_model.predict(new_entry_df)
+    date_split = date.split("-")
+    datetime_date = datetime(int(date_split[0]), int(date_split[1]), int(date_split[2]))
+    unix_start_date = datetime(1970, 1, 1)
+
+    house_prediction_data["delta_date_of_transfer"] = (datetime_date - unix_start_date).days
+    new_entry_df = pd.DataFrame([house_prediction_data])
+    prediction = abs(fitted_model.predict(new_entry_df)[0])
+    return prediction
 
 
 def predict_price(conn, latitude, longitude, date, property_type):
