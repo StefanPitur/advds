@@ -21,9 +21,4 @@ default_tags_aggregation: {
 default_tags_distances: [2, 5, 2, 2, 2, 2, 2, 5, 2]
 default_tags_metrics: ["distance", "count", "count", "distance", "distance", "distance", "distance", "count", "distance"]
 default_bounding_box: 0.0451
-default_category_distance_boundaries: {
-    "walking_distance": 0.5,
-    "cycling_distance": 5,
-    "driving_distance": 10
-}
 default_training_size: 0.8

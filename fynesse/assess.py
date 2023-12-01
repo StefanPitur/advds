@@ -100,7 +100,6 @@ def display_corr_between_features_and_price(sampled_houses_df):
         'public_transport'
     ]]
 
-    filtered_houses_df.fillna(0, inplace=True)
     return filtered_houses_df.corr()
 
 
