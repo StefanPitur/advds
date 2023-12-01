@@ -248,13 +248,13 @@ def upload_csv_to_table(conn, table_name, csv_file_path):
     conn.commit()
 
 
-def create_column_index_on_table(conn, table, index_column_name, column_name):
+def create_columns_index_on_table(conn, table, index_column_name, column_names):
     conn.cursor().execute(f"""
             DROP INDEX IF EXISTS `{index_column_name}` ON `{table}`
         """)
     conn.cursor().execute(f"""
             CREATE INDEX IF NOT EXISTS `{index_column_name}` USING HASH
-            ON `{table}` ({column_name})
+            ON `{table}` ({", ".join(column_names)})
         """)
     conn.commit()
 
