@@ -8,6 +8,18 @@ from . import access
 from .config import *
 
 
+def compute_tags_categories(tags):
+    tags_matches = []
+    for (i, j) in tags.items():
+        if isinstance(j, bool):
+            tags_matches.append((i, "*"))
+        else:
+            for k in j:
+                tags_matches.append((i, k))
+
+    return tags_matches
+
+
 def calculate_distance(poi, latitude, longitude):
     point = (poi["geometry"].centroid.y, poi["geometry"].centroid.x)
     return haversine(point, (latitude, longitude), unit=Unit.KILOMETERS)
@@ -15,61 +27,39 @@ def calculate_distance(poi, latitude, longitude):
 
 def compute_tags_metrics_for_location(latitude, longitude,
                                       tags=config["default_tags"],
-                                      tags_list=config["default_tags_list"],
                                       tags_distances=config["default_tags_distances"],
                                       tags_metrics=config["default_tags_metrics"],
                                       tags_aggregation=config["default_tags_aggregation"]):
-
     bounding_box = compute_bounding_box_cardinals(latitude, longitude)
     pois_df = access.retrieve_pois_from_bbox_given_tags(bounding_box, tags)
 
     pois_df["distance"] = pois_df.apply(calculate_distance, args=(latitude, longitude), axis=1)
+    tags_list = compute_tags_categories(tags)
 
     tag_computed = {}
 
-    for (tag, tag_distance, tag_metric) in zip(tags_list, tags_distances, tags_metrics):
-        try:
-            filtered_pois = pois_df[pois_df[tag].notnull() and pois_df["distance"] <= tag_distance]
+    for (tag_tuple, tag_distance, tag_metric) in zip(tags_list, tags_distances, tags_metrics):
+        pois_df_by_distance = pois_df[pois_df["distance"] <= tag_distance]
+        (tag, tag_value) = tag_tuple
 
-            aggregated_tag = tags_aggregation[tag]
-            if tag_metric == "distance":
-                tag_computed[aggregated_tag] = min(
-                    tag_computed.get(aggregated_tag, filtered_pois["distance"].min()),
-                    filtered_pois["distance"].min()
-                )
-            elif tag_metric == "count":
-                tag_computed[aggregated_tag] = tag_computed.get(aggregated_tag, 0) + np.sqrt(filtered_pois.shape[0])
-            else:
-                raise NotImplemented("Need to provide implementation for custom metrics")
-        except Exception:
-            tag_computed[tag_metric] = None
+        if tag_value == "*":
+            aggregated_tag = tag
+            filtered_pois = pois_df_by_distance[pois_df_by_distance[tag].notnull()]
+        else:
+            aggregated_tag = tags_aggregation[tag_value]
+            filtered_pois = pois_df_by_distance[pois_df_by_distance[tag] == tag_value]
+
+        if tag_metric == "distance":
+            tag_computed[aggregated_tag] = min(
+                tag_computed.get(aggregated_tag, filtered_pois["distance"].min()),
+                filtered_pois["distance"].min()
+            )
+        elif tag_metric == "count":
+            tag_computed[aggregated_tag] = tag_computed.get(aggregated_tag, 0) + np.sqrt(filtered_pois.shape[0])
+        else:
+            raise NotImplemented("Need to provide implementation for custom metrics")
 
     return tag_computed
-
-
-def compute_tags_count_per_distance_category(pois_df, latitude, longitude, tags_list=config["default_tags_list"],
-                                             category_distance_boundaries=config["default_category_distance_boundaries"]):
-    tag_count_per_distance_category = {}
-
-    for tag in tags_list:
-        try:
-            pois_by_tag = pois_df[pois_df[tag].notnull()]
-        except Exception:
-            for category_id, category_distance in category_distance_boundaries.items():
-                tag_count_per_distance_category[str(tag) + "-" + category_id] = 0
-            continue
-
-        previous_matched_len = 0
-
-        for category_id, category_distance in category_distance_boundaries.items():
-            matched_pois = pois_by_tag[pois_by_tag["geometry"].apply(
-                lambda geom: haversine((geom.centroid.x, geom.centroid.y), (longitude, latitude),
-                                       unit=Unit.KILOMETERS) <= category_distance)]
-
-            tag_count_per_distance_category[str(tag) + "-" + category_id] = len(matched_pois) - previous_matched_len
-            previous_matched_len = len(matched_pois)
-
-    return tag_count_per_distance_category
 
 
 def join_osm_with_prices_coordinates(conn, bounding_box, min_date, max_date, house_type, house_sample_size=None):
@@ -100,12 +90,13 @@ def join_osm_with_prices_coordinates(conn, bounding_box, min_date, max_date, hou
 def display_corr_between_features_and_price(sampled_houses_df):
     filtered_houses_df = sampled_houses_df[[
         'price',
-        'school-walking_distance', 'school-cycling_distance', 'school-driving_distance',
-        'restaurant-walking_distance', 'restaurant-cycling_distance', 'restaurant-driving_distance',
-        'leisure-walking_distance', 'leisure-cycling_distance', 'leisure-driving_distance',
-        'healthcare-walking_distance', 'healthcare-cycling_distance', 'healthcare-driving_distance',
-        'shop-walking_distance', 'shop-cycling_distance', 'shop-driving_distance',
-        'public_transport-walking_distance', 'public_transport-cycling_distance', 'public_transport-driving_distance'
+        'school',
+        'restaurant',
+        'leisure',
+        'healthcare',
+        'food',
+        'mall',
+        'public_transport'
     ]]
 
     filtered_houses_df.fillna(0, inplace=True)
@@ -116,7 +107,7 @@ def get_distances_features_from_a_house(house):
     bounding_box = compute_bounding_box_cardinals(float(house.latitude), float(house.longitude))
     house_pois = access.retrieve_pois_from_bbox_given_tags(bounding_box)
 
-    return compute_tags_count_per_distance_category(
+    return compute_tags_metrics_for_location(
         house_pois,
         house.latitude,
         house.longitude
