@@ -14,13 +14,15 @@ def calculate_distance(poi, latitude, longitude):
 
 
 def compute_tags_metrics_for_location(latitude, longitude,
+                                      tags=config["default_tags"],
                                       tags_list=config["default_tags_list"],
                                       tags_distances=config["default_tags_distances"],
                                       tags_metrics=config["default_tags_metrics"],
                                       tags_aggregation=config["default_tags_aggregation"]):
 
     bounding_box = compute_bounding_box_cardinals(latitude, longitude)
-    pois_df = access.retrieve_pois_from_bbox_given_tags(bounding_box, tags_list)
+    pois_df = access.retrieve_pois_from_bbox_given_tags(bounding_box, tags)
+
     pois_df["distance"] = haversine(pois_df["geometry"].centroid, (latitude, longitude))
     pois_df["distance"] = pois_df.apply(calculate_distance, args=(latitude, longitude), axis=1)
 
