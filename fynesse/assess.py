@@ -23,7 +23,6 @@ def compute_tags_metrics_for_location(latitude, longitude,
     bounding_box = compute_bounding_box_cardinals(latitude, longitude)
     pois_df = access.retrieve_pois_from_bbox_given_tags(bounding_box, tags)
 
-    pois_df["distance"] = haversine(pois_df["geometry"].centroid, (latitude, longitude))
     pois_df["distance"] = pois_df.apply(calculate_distance, args=(latitude, longitude), axis=1)
 
     tag_computed = {}
