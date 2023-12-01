@@ -125,41 +125,27 @@ def download_postcode_data():
 
 # prices_coordinates_data code
 def create_and_populate_prices_coordinates_data_table(conn):
-    create_prices_coordinates_data_table(conn)
+    create_database_table(conn, "prices_coordinates", get_prices_coordinates_data_table_schema(), "db_id")
     populate_prices_coordinates_data_table(conn)
 
 
-def create_prices_coordinates_data_table(conn):
-    conn.cursor().execute("""
-        DROP TABLE IF EXISTS `prices_coordinates_data`;
-    """)
-    conn.cursor().execute("""
-        CREATE TABLE IF NOT EXISTS `prices_coordinates_data` (
-          `price` int(10) unsigned NOT NULL,
-          `date_of_transfer` date NOT NULL,
-          `postcode` varchar(8) COLLATE utf8_bin NOT NULL,
-          `property_type` varchar(1) COLLATE utf8_bin NOT NULL,
-          `new_build_flag` varchar(1) COLLATE utf8_bin NOT NULL,
-          `tenure_type` varchar(1) COLLATE utf8_bin NOT NULL,
-          `locality` tinytext COLLATE utf8_bin NOT NULL,
-          `town_city` tinytext COLLATE utf8_bin NOT NULL,
-          `district` tinytext COLLATE utf8_bin NOT NULL,
-          `county` tinytext COLLATE utf8_bin NOT NULL,
-          `country` enum('England', 'Wales', 'Scotland', 'Northern Ireland', 'Channel Islands', 'Isle of Man') NOT NULL,
-          `latitude` decimal(11,8) NOT NULL,
-          `longitude` decimal(10,8) NOT NULL,
-          `db_id` bigint(20) unsigned NOT NULL
-        ) DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
-    """)
-    conn.cursor().execute("""
-        ALTER TABLE `prices_coordinates_data`
-        ADD PRIMARY KEY (`db_id`);
-    """)
-    conn.cursor().execute("""
-        ALTER TABLE `prices_coordinates_data`
-        MODIFY `db_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=1;
-    """)
-    conn.commit()
+def get_prices_coordinates_data_table_schema():
+    return """
+        `price` int(10) unsigned NOT NULL,
+        `date_of_transfer` date NOT NULL,
+        `postcode` varchar(8) COLLATE utf8_bin NOT NULL,
+        `property_type` varchar(1) COLLATE utf8_bin NOT NULL,
+        `new_build_flag` varchar(1) COLLATE utf8_bin NOT NULL,
+        `tenure_type` varchar(1) COLLATE utf8_bin NOT NULL,
+        `locality` tinytext COLLATE utf8_bin NOT NULL,
+        `town_city` tinytext COLLATE utf8_bin NOT NULL,
+        `district` tinytext COLLATE utf8_bin NOT NULL,
+        `county` tinytext COLLATE utf8_bin NOT NULL,
+        `country` enum('England', 'Wales', 'Scotland', 'Northern Ireland', 'Channel Islands', 'Isle of Man') NOT NULL,
+        `latitude` decimal(11,8) NOT NULL,
+        `longitude` decimal(10,8) NOT NULL,
+        `db_id` bigint(20) unsigned NOT NULL
+    """
 
 
 def populate_prices_coordinates_data_table(conn):
