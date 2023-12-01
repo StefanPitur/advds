@@ -77,7 +77,7 @@ def join_osm_with_prices_coordinates(conn, bounding_box, min_date, max_date, hou
 
     sampled_houses_df = houses_df.sample(n=house_sample_size)
     sampled_houses_features_categories_columns = sampled_houses_df.apply(
-        lambda house: get_distances_features_from_a_house(house),
+        lambda house: compute_tags_metrics_for_location(float(house.latitude), float(house.longitude)),
         axis=1)
     sampled_houses_features_categories_columns_df = pd.DataFrame(sampled_houses_features_categories_columns.tolist())
 
@@ -101,17 +101,6 @@ def display_corr_between_features_and_price(sampled_houses_df):
 
     filtered_houses_df.fillna(0, inplace=True)
     return filtered_houses_df.corr()
-
-
-def get_distances_features_from_a_house(house):
-    bounding_box = compute_bounding_box_cardinals(float(house.latitude), float(house.longitude))
-    house_pois = access.retrieve_pois_from_bbox_given_tags(bounding_box)
-
-    return compute_tags_metrics_for_location(
-        house_pois,
-        house.latitude,
-        house.longitude
-    )
 
 
 def compute_bounding_box_cardinals(latitude, longitude,
