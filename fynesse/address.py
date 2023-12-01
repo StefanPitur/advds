@@ -18,7 +18,6 @@ def fit_model(houses_data):
 
     features_columns = [
         "delta_date_of_transfer",
-        "price",
         "school",
         "restaurant",
         "leisure",
