@@ -50,10 +50,12 @@ def compute_tags_metrics_for_location(latitude, longitude,
             filtered_pois = pois_df_by_distance[pois_df_by_distance[tag] == tag_value]
 
         if tag_metric == "distance":
-            tag_computed[aggregated_tag] = min(
-                tag_computed.get(aggregated_tag, filtered_pois["distance"].min()),
-                filtered_pois["distance"].min()
-            )
+            try:
+                tag_computed[aggregated_tag] = max(
+                    tag_computed.get(aggregated_tag, 0), 2 / (filtered_pois["distance"].min())
+                )
+            except:
+                tag_computed[aggregated_tag] = 0
         elif tag_metric == "count":
             tag_computed[aggregated_tag] = tag_computed.get(aggregated_tag, 0) + np.sqrt(filtered_pois.shape[0])
         else:
