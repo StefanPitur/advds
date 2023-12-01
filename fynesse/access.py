@@ -52,50 +52,32 @@ def create_db_connection(
 
 
 # pp_data code
-
-
 def create_and_populate_pp_data_table(conn):
-    create_pp_data_table(conn)
+    create_database_table(conn, "pp_data", get_pp_data_table_schema(), "db_id")
     pp_data_csv_path = download_pp_data()
-    populate_pp_data_table(conn, pp_data_csv_path)
+    upload_csv_to_table(conn, "pp_data", pp_data_csv_path)
 
 
-def create_pp_data_table(conn):
-    conn.cursor().execute("""
-        -- Table structure for table `pp_data`
-        DROP TABLE IF EXISTS `pp_data`;
-    """)
-    conn.cursor().execute("""
-        CREATE TABLE IF NOT EXISTS `pp_data` (
-          `transaction_unique_identifier` tinytext COLLATE utf8_bin NOT NULL,
-          `price` int(10) unsigned NOT NULL,
-          `date_of_transfer` date NOT NULL,
-          `postcode` varchar(8) COLLATE utf8_bin NOT NULL,
-          `property_type` varchar(1) COLLATE utf8_bin NOT NULL,
-          `new_build_flag` varchar(1) COLLATE utf8_bin NOT NULL,
-          `tenure_type` varchar(1) COLLATE utf8_bin NOT NULL,
-          `primary_addressable_object_name` tinytext COLLATE utf8_bin NOT NULL,
-          `secondary_addressable_object_name` tinytext COLLATE utf8_bin NOT NULL,
-          `street` tinytext COLLATE utf8_bin NOT NULL,
-          `locality` tinytext COLLATE utf8_bin NOT NULL,
-          `town_city` tinytext COLLATE utf8_bin NOT NULL,
-          `district` tinytext COLLATE utf8_bin NOT NULL,
-          `county` tinytext COLLATE utf8_bin NOT NULL,
-          `ppd_category_type` varchar(2) COLLATE utf8_bin NOT NULL,
-          `record_status` varchar(2) COLLATE utf8_bin NOT NULL,
-          `db_id` bigint(20) unsigned NOT NULL
-        ) DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
-    """)
-    conn.cursor().execute("""
-        -- Primary key for table `pp_data` 
-        ALTER TABLE `pp_data`
-        ADD PRIMARY KEY (`db_id`);
-    """)
-    conn.cursor().execute("""
-        ALTER TABLE `pp_data`
-        MODIFY db_id bigint(20) unsigned NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
-    """)
-    conn.commit()
+def get_pp_data_table_schema():
+    return """
+        `transaction_unique_identifier` tinytext COLLATE utf8_bin NOT NULL,
+        `price` int(10) unsigned NOT NULL,
+        `date_of_transfer` date NOT NULL,
+        `postcode` varchar(8) COLLATE utf8_bin NOT NULL,
+        `property_type` varchar(1) COLLATE utf8_bin NOT NULL,
+        `new_build_flag` varchar(1) COLLATE utf8_bin NOT NULL,
+        `tenure_type` varchar(1) COLLATE utf8_bin NOT NULL,
+        `primary_addressable_object_name` tinytext COLLATE utf8_bin NOT NULL,
+        `secondary_addressable_object_name` tinytext COLLATE utf8_bin NOT NULL,
+        `street` tinytext COLLATE utf8_bin NOT NULL,
+        `locality` tinytext COLLATE utf8_bin NOT NULL,
+        `town_city` tinytext COLLATE utf8_bin NOT NULL,
+        `district` tinytext COLLATE utf8_bin NOT NULL,
+        `county` tinytext COLLATE utf8_bin NOT NULL,
+        `ppd_category_type` varchar(2) COLLATE utf8_bin NOT NULL,
+        `record_status` varchar(2) COLLATE utf8_bin NOT NULL,
+        `db_id` bigint(20) unsigned NOT NULL
+    """
 
 
 def download_pp_data():
@@ -104,60 +86,34 @@ def download_pp_data():
     return download_file(complete_pp_data_url, pp_data_csv_path)
 
 
-def populate_pp_data_table(conn, pp_data_csv_path):
-    conn.cursor().execute(f"""
-        LOAD DATA LOCAL INFILE '{pp_data_csv_path}' INTO TABLE pp_data
-        FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED by '"'
-        LINES STARTING BY '' TERMINATED BY '\n';
-    """)
-    conn.commit()
-
-
 # postcode_data code
-
-
 def create_and_populate_postcode_data_table(conn):
-    create_postcode_data_table(conn)
+    create_database_table(conn, "postcode_data", get_postcode_data_table_schema(), "db_id")
     postcode_data_csv_path = download_postcode_data()
-    populate_postcode_data_table(conn, postcode_data_csv_path)
+    upload_csv_to_table(conn, "postcode_data", postcode_data_csv_path)
 
 
-def create_postcode_data_table(conn):
-    conn.cursor().execute("""
-        -- Table structure for table `postcode_data`
-        DROP TABLE IF EXISTS `postcode_data`;
-    """)
-    conn.cursor().execute("""
-        CREATE TABLE IF NOT EXISTS `postcode_data` (
-          `postcode` varchar(8) COLLATE utf8_bin NOT NULL,
-          `status` enum('live','terminated') NOT NULL,
-          `usertype` enum('small', 'large') NOT NULL,
-          `easting` int unsigned,
-          `northing` int unsigned,
-          `positional_quality_indicator` int NOT NULL,
-          `country` enum('England', 'Wales', 'Scotland', 'Northern Ireland', 'Channel Islands', 'Isle of Man') NOT NULL,
-          `latitude` decimal(11,8) NOT NULL,
-          `longitude` decimal(10,8) NOT NULL,
-          `postcode_no_space` tinytext COLLATE utf8_bin NOT NULL,
-          `postcode_fixed_width_seven` varchar(7) COLLATE utf8_bin NOT NULL,
-          `postcode_fixed_width_eight` varchar(8) COLLATE utf8_bin NOT NULL,
-          `postcode_area` varchar(2) COLLATE utf8_bin NOT NULL,
-          `postcode_district` varchar(4) COLLATE utf8_bin NOT NULL,
-          `postcode_sector` varchar(6) COLLATE utf8_bin NOT NULL,
-          `outcode` varchar(4) COLLATE utf8_bin NOT NULL,
-          `incode` varchar(3)  COLLATE utf8_bin NOT NULL,
-          `db_id` bigint(20) unsigned NOT NULL
-        ) DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-    """)
-    conn.cursor().execute("""
-        ALTER TABLE `postcode_data`
-        ADD PRIMARY KEY (`db_id`);
-    """)
-    conn.cursor().execute("""
-        ALTER TABLE `postcode_data`
-        MODIFY `db_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=1;
-    """)
-    conn.commit()
+def get_postcode_data_table_schema():
+    return """
+        `postcode` varchar(8) COLLATE utf8_bin NOT NULL,
+        `status` enum('live','terminated') NOT NULL,
+        `usertype` enum('small', 'large') NOT NULL,
+        `easting` int unsigned,
+        `northing` int unsigned,
+        `positional_quality_indicator` int NOT NULL,
+        `country` enum('England', 'Wales', 'Scotland', 'Northern Ireland', 'Channel Islands', 'Isle of Man') NOT NULL,
+        `latitude` decimal(11,8) NOT NULL,
+        `longitude` decimal(10,8) NOT NULL,
+        `postcode_no_space` tinytext COLLATE utf8_bin NOT NULL,
+        `postcode_fixed_width_seven` varchar(7) COLLATE utf8_bin NOT NULL,
+        `postcode_fixed_width_eight` varchar(8) COLLATE utf8_bin NOT NULL,
+        `postcode_area` varchar(2) COLLATE utf8_bin NOT NULL,
+        `postcode_district` varchar(4) COLLATE utf8_bin NOT NULL,
+        `postcode_sector` varchar(6) COLLATE utf8_bin NOT NULL,
+        `outcode` varchar(4) COLLATE utf8_bin NOT NULL,
+        `incode` varchar(3)  COLLATE utf8_bin NOT NULL,
+        `db_id` bigint(20) unsigned NOT NULL
+    """
 
 
 def download_postcode_data():
@@ -167,17 +123,7 @@ def download_postcode_data():
     return unzip_file(postcode_data_zip_path)
 
 
-def populate_postcode_data_table(conn, postcode_data_csv_path):
-    conn.cursor().execute(f"""
-        LOAD DATA LOCAL INFILE '{postcode_data_csv_path}' INTO TABLE `postcode_data`
-        FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED by '"'
-        LINES STARTING BY '' TERMINATED BY '\n';
-    """)
-    conn.commit()
-
-
 # prices_coordinates_data code
-
 def create_and_populate_prices_coordinates_data_table(conn):
     create_prices_coordinates_data_table(conn)
     populate_prices_coordinates_data_table(conn)
@@ -287,6 +233,35 @@ def retrieve_pois_from_bbox_given_tags(bounding_box, tags=config["default_tags"]
 
 
 # Util functions
+def create_database_table(conn, table_name, table_schema, table_pk):
+    conn.cursor().execute(f"""
+        -- Table structure for table `pp_data`
+        DROP TABLE IF EXISTS `{table_name}`;
+    """)
+    conn.cursor().execute(f"""
+        CREATE TABLE IF NOT EXISTS `{table_name}` ({table_schema}) DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
+    """)
+    conn.cursor().execute(f"""
+        -- Primary key for table `pp_data` 
+        ALTER TABLE `{table_name}`
+        ADD PRIMARY KEY (`{table_pk}`);
+    """)
+    conn.cursor().execute(f"""
+        ALTER TABLE `{table_name}`
+        MODIFY {table_pk} bigint(20) unsigned NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
+    """)
+    conn.commit()
+
+
+def upload_csv_to_table(conn, table_name, csv_file_path):
+    conn.cursor().execute(f"""
+        LOAD DATA LOCAL INFILE '{csv_file_path}' INTO TABLE {table_name}
+        FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED by '"'
+        LINES STARTING BY '' TERMINATED BY '\n';
+    """)
+    conn.commit()
+
+
 def create_column_index_on_table(conn, table, index_column_name, column_name):
     conn.cursor().execute(f"""
             DROP INDEX IF EXISTS `{index_column_name}` ON `{table}`
