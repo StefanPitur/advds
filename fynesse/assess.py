@@ -74,6 +74,7 @@ def join_osm_with_prices_coordinates(conn, bounding_box, min_date, max_date, hou
 
     if house_sample_size is None:
         house_sample_size = len(houses_df)
+    house_sample_size = min(len(houses_df), house_sample_size)
 
     sampled_houses_df = houses_df.sample(n=house_sample_size)
     sampled_houses_features_categories_columns = sampled_houses_df.apply(
