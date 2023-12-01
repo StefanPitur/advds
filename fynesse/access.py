@@ -181,15 +181,6 @@ def populate_prices_coordinates_data_table(conn):
     conn.commit()
 
 
-def number_of_rows_prices_coordinates_data_table(conn):
-    cur = conn.cursor()
-    cur.execute("""
-           SELECT COUNT(*) AS row_count
-           FROM `prices_coordinates_data`
-        """)
-    return cur.fetchall()
-
-
 def get_prices_coordinates_for_coords_and_timedelta(conn, bounding_box, min_date, max_date, property_type):
     north, south, west, east = bounding_box
     cur = conn.cursor()
