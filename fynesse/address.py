@@ -10,7 +10,6 @@ def fit_model(houses_data):
     houses_data["latitude"] = houses_data["latitude"].astype(float)
     houses_data["longitude"] = houses_data["longitude"].astype(float)
 
-    houses_data["unix_date_of_transfer_days"] = houses_data["date_of_transfer"].timestamp()
     houses_data["delta_date_of_transfer"] = pd.to_datetime(houses_data["date_of_transfer"]).astype(int) // 10 ** 9 / 86400
 
     training_data, test_data = assess.split_training_and_validation_data(houses_data, 0.9)
